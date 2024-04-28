@@ -25,8 +25,6 @@ from lm_eval.utils import stop_sequences_criteria
 from accelerate import Accelerator, find_executable_batch_size, DistributedType
 from typing import List, Optional, Union, Tuple
 
-# from .aqlm_utils import load_dequantized_model
-
 eval_logger = utils.eval_logger
 
 
@@ -101,6 +99,7 @@ class HFLM(LM):
         # whether to load AQLM quantized model
         aqlm_src_path: Optional[str] = None,
         aqlm_checkpoint_path: Optional[str] = None,
+        aqlm_finetuned_checkpoint_path: Optional[str] = None,
     ) -> None:
         super().__init__()
 
@@ -238,7 +237,7 @@ class HFLM(LM):
             sys.path.append(aqlm_src_path)
             from src.modelutils import load_dequantized_model
             eval_logger.info("Loading quantized model ...")
-            self._model = load_dequantized_model(self.model, aqlm_checkpoint_path)
+            self._model = load_dequantized_model(self.model, aqlm_checkpoint_path, aqlm_finetuned_checkpoint_path)
 
         if peft:
             assert not aqlm_checkpoint_path
