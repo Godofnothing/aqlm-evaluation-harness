@@ -235,10 +235,13 @@ class HFLM(LM):
             assert aqlm_src_path is not None
             import sys
             sys.path.append(aqlm_src_path)
-            from src.modelutils import load_dequantized_model
+            from src.modelutils import load_quantized_model, dequantize_quantized_model
             eval_logger.info("Loading quantized model ...")
-            self._model = load_dequantized_model(self.model, aqlm_checkpoint_path, aqlm_finetuned_checkpoint_path)
-
+            self._model = load_quantized_model(self._model, aqlm_checkpoint_path)
+            if aqlm_finetuned_checkpoint_path:
+                self._model.load_state_dict(torch.load(aqlm_finetuned_checkpoint_path), strict=False)
+            dequantize_quantized_model(self._model)
+            self._model = self._model.to(dtype=utils.get_dtype(dtype))
         if peft:
             assert not aqlm_checkpoint_path
             if load_in_4bit:
